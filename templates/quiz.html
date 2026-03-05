@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Опрос</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label>Вопрос 1: Расскажите о ваших интересах</label>
+        <textarea name="answer1" class="form-control" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Вопрос 2: Какие у вас способности?</label>
+        <textarea name="answer2" class="form-control" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Вопрос 3: Что вы предпочитаете в работе?</label>
+        <textarea name="answer3" class="form-control" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% endblock %}
