@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduPath AI — ПГУТИ</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0f1b2d;--navy2:#1a2a42;--navy3:#243552;
+  --teal:#1ec8a0;--teal2:#17a98a;--teal-light:#e0f8f2;
+  --text:#1a2a42;--text2:#4a5568;--text3:#8899aa;
+  --bg:#f4f6f9;--white:#ffffff;--border:#e2e8f0;
+}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+
+/* ===== AUTH SCREEN ===== */
+#authScreen{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f1b2d 0%,#1a3a5c 50%,#0f2d2a 100%);}
+#authScreen.hide{animation:authFadeOut .5s ease forwards;}
+@keyframes authFadeOut{to{opacity:0;pointer-events:none;}}
+.auth-container{position:relative;width:820px;max-width:95vw;height:520px;background:var(--white);border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.4);}
+/* panels */
+.auth-form-box{position:absolute;top:0;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 36px;transition:all .6s ease;}
+.auth-form-box.login-box{left:0;}
+.auth-form-box.register-box{left:50%;opacity:0;pointer-events:none;}
+.auth-container.active .auth-form-box.login-box{opacity:0;pointer-events:none;}
+.auth-container.active .auth-form-box.register-box{opacity:1;pointer-events:all;}
+/* overlay */
+.auth-overlay-wrap{position:absolute;top:0;left:50%;width:50%;height:100%;overflow:hidden;z-index:10;transition:transform .6s ease;}
+.auth-container.active .auth-overlay-wrap{transform:translateX(-100%);}
+.auth-overlay{position:relative;background:linear-gradient(135deg,var(--teal) 0%,var(--navy) 100%);height:100%;width:200%;left:-100%;transition:transform .6s ease;}
+.auth-container.active .auth-overlay{transform:translateX(50%);}
+.auth-overlay-panel{position:absolute;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;height:100%;width:50%;text-align:center;}
+.auth-overlay-panel.left{left:0;}
+.auth-overlay-panel.right{right:0;}
+/* form elements */
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.auth-logo-icon{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.auth-logo-icon svg{width:18px;height:18px;fill:#fff;}
+.auth-logo-text{font-size:16px;font-weight:700;color:var(--navy);}
+.auth-h2{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.auth-sub{font-size:12px;color:var(--text3);margin-bottom:22px;}
+.auth-social{display:flex;gap:10px;margin-bottom:18px;}
+.auth-social a{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;transition:all .15s;text-decoration:none;font-size:14px;}
+.auth-social a:hover{border-color:var(--teal);color:var(--teal);}
+.auth-span{font-size:11px;color:var(--text3);margin-bottom:14px;}
+.auth-input-wrap{position:relative;width:100%;margin-bottom:10px;}
+.auth-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3);}
+.auth-input{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 36px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;}
+.auth-input:focus{border-color:var(--teal);background:var(--white);}
+.auth-input::placeholder{color:var(--text3);}
+.auth-forgot{font-size:11px;color:var(--text3);margin:4px 0 18px;cursor:pointer;align-self:flex-end;}
+.auth-forgot:hover{color:var(--teal);}
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--teal),var(--navy));color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.03em;transition:opacity .15s;box-shadow:0 4px 14px rgba(30,200,160,0.3);}
+.auth-btn:hover{opacity:.9;}
+/* overlay text */
+.auth-ov-h2{font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;}
+.auth-ov-p{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;margin-bottom:24px;}
+.auth-ov-btn{border:2px solid #fff;background:transparent;color:#fff;border-radius:22px;padding:9px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.03em;}
+.auth-ov-btn:hover{background:#fff;color:var(--navy);}
+/* demo skip */
+.auth-skip{position:absolute;top:16px;right:16px;font-size:11px;color:rgba(255,255,255,0.5);cursor:pointer;z-index:20;transition:color .15s;}
+.auth-skip:hover{color:#fff;}
+/* user badge in topbar */
+.user-badge{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border:1px solid var(--border);border-radius:22px;cursor:pointer;transition:border-color .15s;}
+.user-badge:hover{border-color:var(--teal);}
+.user-av{width:28px;height:28px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-name{font-size:12px;font-weight:600;color:var(--text);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.auth-error{font-size:11px;color:#e53e3e;margin-bottom:8px;display:none;}
+.auth-error.show{display:block;}
+.sidebar{width:210px;min-width:210px;background:var(--navy);display:flex;flex-direction:column;}
+.sidebar-logo{padding:18px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.logo-row{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:18px;height:18px;fill:#fff;}
+.logo-text{color:#fff;font-size:14px;font-weight:700;line-height:1.2;}
+.logo-sub{color:rgba(255,255,255,0.4);font-size:10px;}
+.sidebar-nav{flex:1;padding:12px 8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;transition:all .18s;margin-bottom:2px;user-select:none;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+.nav-item.active{background:var(--teal);color:#fff;}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;}
+.sidebar-bottom{padding:10px 8px 16px;border-top:1px solid rgba(255,255,255,0.07);}
+.nav-sm{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.4);font-size:12px;transition:color .15s;}
+.nav-sm:hover{color:rgba(255,255,255,0.7);}
+.nav-sm svg{width:15px;height:15px;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;flex-shrink:0;}
+.top-nav{display:flex;gap:4px;flex:1;}
+.top-tab{padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;user-select:none;}
+.top-tab:hover{color:var(--text);}
+.top-tab.active{color:var(--navy);border-bottom-color:var(--navy);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);}
+.icon-btn svg{width:16px;height:16px;}
+.btn-go{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-go:hover{background:var(--teal);}
+.content{flex:1;overflow-y:auto;padding:24px 28px;}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:100%;}
+.chat-messages{flex:1;overflow-y:auto;padding-bottom:8px;}
+.msg{display:flex;gap:12px;margin-bottom:18px;max-width:620px;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.av{width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;}
+.av.u{background:var(--navy);}
+.msg-who{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;}
+.bubble{background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:11px 15px;font-size:13.5px;line-height:1.65;color:var(--text);}
+.bubble b{color:var(--navy);font-weight:700;}
+.msg.um{flex-direction:row-reverse;margin-left:auto;max-width:480px;}
+.um .bubble{background:var(--navy);color:#fff;border-color:var(--navy);border-radius:12px 4px 12px 12px;}
+.um .msg-who{text-align:right;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.chip{border:1.5px solid var(--navy);color:var(--navy);background:transparent;border-radius:20px;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.chip:hover,.chip.sel{background:var(--navy);color:#fff;}
+.chip:disabled{opacity:.4;cursor:default;}
+.typing-bubble{display:flex;align-items:center;gap:5px;padding:11px 15px;background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:bounce .9s infinite;}
+.dot:nth-child(2){animation-delay:.15s;}.dot:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+.ege-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;}
+.ege-row{display:flex;flex-direction:column;gap:3px;}
+.ege-label{font-size:11px;color:var(--text3);}
+.ege-input{border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:13px;font-family:inherit;width:100%;background:var(--white);color:var(--text);outline:none;}
+.ege-input:focus{border-color:var(--teal);}
+.submit-btn{margin-top:10px;background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;}
+.submit-btn:hover{background:var(--teal2);}
+.pbar-wrap{margin-top:12px;}
+.pbar-lbl{font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;}
+.pbar-track{height:4px;background:rgba(255,255,255,0.15);border-radius:10px;overflow:hidden;}
+.pbar-fill{height:100%;background:var(--teal);border-radius:10px;transition:width .4s;}
+.chat-input-bar{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:4px 4px 4px 14px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-shrink:0;}
+.chat-input-bar input{flex:1;border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--text);background:transparent;}
+.chat-input-bar input::placeholder{color:var(--text3);}
+.send-btn{width:38px;height:38px;border-radius:9px;border:none;background:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.send-btn:hover{background:var(--teal);}
+.send-btn svg{width:16px;height:16px;fill:#fff;}
+.chat-note{text-align:center;font-size:11px;color:var(--text3);margin-top:6px;}
+
+/* ANALYTICS */
+.an-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.an-title h1{font-size:23px;font-weight:700;}
+.an-title p{font-size:13px;color:var(--text2);margin-top:3px;}
+.share-btn{display:flex;align-items:center;gap:7px;background:var(--teal);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.share-btn svg{width:14px;height:14px;}
+.an-grid{display:grid;grid-template-columns:1fr 230px;gap:18px;margin-bottom:18px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-size:14px;font-weight:600;}
+.radar-wrap{height:250px;position:relative;}
+.skill-section{display:flex;flex-direction:column;}
+.skills-hd{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
+.sk-row{margin-bottom:14px;}
+.sk-label{display:flex;justify-content:space-between;font-size:13px;font-weight:500;margin-bottom:6px;}
+.sk-bar{height:7px;background:var(--border);border-radius:10px;overflow:hidden;}
+.sk-fill{height:100%;border-radius:10px;transition:width .6s;}
+.sk-fill.hard{background:var(--teal);}
+.sk-fill.soft{background:var(--navy);}
+.sk-fill.it{background:#6366f1;}
+.resume-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;}
+.resume-hd{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
+.resume-ico{width:26px;height:26px;background:var(--teal-light);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.resume-ico svg{width:14px;height:14px;color:var(--teal);}
+.resume-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+.resume-text{font-size:13px;line-height:1.7;color:var(--text2);margin-bottom:11px;white-space:pre-line;}
+.resume-why{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.resume-bullets{list-style:none;padding:0;}
+.resume-bullets li{font-size:13px;color:var(--text2);padding-left:14px;position:relative;margin-bottom:3px;}
+.resume-bullets li::before{content:"•";position:absolute;left:0;color:var(--teal);font-weight:700;}
+.dir-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+.dir-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:15px;cursor:pointer;transition:border-color .15s;}
+.dir-card:hover{border-color:var(--teal);}
+.dir-card.hl{background:var(--teal-light);border-color:var(--teal);}
+.dir-ico{font-size:20px;margin-bottom:8px;}
+.dir-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.dir-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.dir-code{font-size:10px;color:var(--text3);margin-top:5px;font-weight:600;}
+
+/* RECOMMENDATIONS */
+.rec-hd{margin-bottom:22px;}
+.rec-hd h1{font-size:23px;font-weight:700;}
+.rec-hd p{font-size:13px;color:var(--text2);margin-top:4px;}
+.rec-layout{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start;}
+.filter-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.filt-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:16px;}
+.filt-title svg{width:14px;height:14px;color:var(--text3);}
+.filt-group{margin-bottom:16px;}
+.filt-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+.filt-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--white);outline:none;cursor:pointer;}
+.range-info{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px;}
+input[type=range]{width:100%;accent-color:var(--navy);}
+.cb-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;cursor:pointer;font-size:13px;transition:border-color .15s;}
+.cb-row:hover{border-color:var(--navy);}
+.cb-row input{accent-color:var(--teal);width:14px;height:14px;}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+.tag-btn{border:1px solid var(--border);background:transparent;border-radius:20px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2);transition:all .15s;}
+.tag-btn:hover,.tag-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+.reset-btn{width:100%;border:1px solid var(--border);background:transparent;border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:var(--text2);cursor:pointer;transition:all .15s;margin-top:4px;}
+.reset-btn:hover{border-color:var(--navy);color:var(--text);}
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px;}
+.prog-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:15px;display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.prog-card:hover{border-color:var(--teal);box-shadow:0 4px 14px rgba(30,200,160,0.1);}
+.prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.prog-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.match-badge{font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;display:flex;align-items:center;gap:3px;}
+.match-badge svg{width:10px;height:10px;}
+.match-badge.h{background:#e0f8f2;color:#0a7a60;}
+.match-badge.m{background:#dbeafe;color:#1d4ed8;}
+.match-badge.l{background:#ede9fe;color:#5b21b6;}
+.prog-code{font-size:10px;color:var(--text3);font-weight:600;margin-bottom:3px;}
+.prog-name{font-size:13.5px;font-weight:700;line-height:1.3;margin-bottom:7px;}
+.prog-desc{font-size:12px;color:var(--text2);line-height:1.5;flex:1;margin-bottom:10px;}
+.prog-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.pt{font-size:11px;color:var(--text3);background:var(--bg);border-radius:6px;padding:3px 7px;}
+.detail-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.detail-btn:hover{background:var(--teal);}
+.lvl-b{font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;background:#e0f8f2;color:#0a7a60;}
+.lvl-m{font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;background:#ede9fe;color:#5b21b6;}
+.no-res{padding:40px;text-align:center;color:var(--text3);font-size:14px;grid-column:1/-1;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:560px;max-height:80vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--bg);border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--text2);}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:4px;}
+.modal-meta{font-size:12px;color:var(--text3);margin-bottom:14px;}
+.msec{margin-bottom:13px;}
+.msec h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px;}
+.msec ul{list-style:none;padding:0;}
+.msec ul li{font-size:13px;color:var(--text2);padding-left:12px;position:relative;margin-bottom:3px;line-height:1.5;}
+.msec ul li::before{content:"·";position:absolute;left:0;color:var(--teal);font-weight:700;}
+
+/* FOOTER */
+.pf{background:var(--white);border-top:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.pf-brand{font-size:14px;font-weight:700;}
+.pf-brand span{color:var(--text3);font-size:11px;font-weight:400;display:block;margin-top:2px;}
+.pf-links{display:flex;gap:18px;}
+.pf-links a{font-size:12px;color:var(--text3);text-decoration:none;}
+.pf-links a:hover{color:var(--text);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- ===== ЭКРАН АВТОРИЗАЦИИ ===== -->
+<div id="authScreen">
+  <span class="auth-skip" onclick="skipAuth()">Пропустить →</span>
+  <div class="auth-container" id="authContainer">
+
+    <!-- ФОРМА ВХОДА -->
+    <div class="auth-form-box login-box">
+      <div class="auth-logo">
+        <div class="auth-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <span class="auth-logo-text">EduPath AI</span>
+      </div>
+      <h2 class="auth-h2">Добро пожаловать</h2>
+      <p class="auth-sub">Войдите, чтобы продолжить подбор направлений</p>
+      <div class="auth-input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input class="auth-input" type="email" id="loginEmail" placeholder="Email"/>
+      </div>
+      <div class="auth-input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input class="auth-input" type="password" id="loginPass" placeholder="Пароль" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <span class="auth-forgot" onclick="alert('Восстановление пароля: обратитесь к администратору')">Забыли пароль?</span>
+      <p class="auth-error" id="loginError">Неверный email или пароль</p>
+      <button class="auth-btn" onclick="doLogin()">ВОЙТИ</button>
+    </div>
+
+    <!-- ФОРМА РЕГИСТРАЦИИ -->
+    <div class="auth-form-box register-box">
+      <div class="auth-logo">
+        <div class="auth-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <span class="auth-logo-text">EduPath AI</span>
+      </div>
+      <h2 class="auth-h2">Создать аккаунт</h2>
+      <p class="auth-sub">Зарегистрируйтесь для сохранения рекомендаций</p>
+      <div class="auth-input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+        <input class="auth-input" type="text" id="regName" placeholder="Имя и фамилия"/>
+      </div>
+      <div class="auth-input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input class="auth-input" type="email" id="regEmail" placeholder="Email"/>
+      </div>
+      <div class="auth-input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input class="auth-input" type="password" id="regPass" placeholder="Пароль" onkeydown="if(event.key==='Enter')doRegister()"/>
+      </div>
+      <p class="auth-error" id="regError">Заполните все поля</p>
+      <button class="auth-btn" onclick="doRegister()">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+    </div>
+
+    <!-- ОВЕРЛЕЙ С АНИМАЦИЕЙ -->
+    <div class="auth-overlay-wrap">
+      <div class="auth-overlay">
+        <!-- левая панель оверлея (показывается когда открыта регистрация) -->
+        <div class="auth-overlay-panel left">
+          <h2 class="auth-ov-h2">С возвращением!</h2>
+          <p class="auth-ov-p">Уже есть аккаунт? Войдите и продолжите подбор направлений ПГУТИ</p>
+          <button class="auth-ov-btn" onclick="switchToLogin()">ВОЙТИ</button>
+        </div>
+        <!-- правая панель оверлея (показывается когда открыт вход) -->
+        <div class="auth-overlay-panel right">
+          <h2 class="auth-ov-h2">Привет, абитуриент!</h2>
+          <p class="auth-ov-p">Зарегистрируйтесь, чтобы сохранять рекомендации и возвращаться к ним</p>
+          <button class="auth-ov-btn" onclick="switchToRegister()">РЕГИСТРАЦИЯ</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ===== КОНЕЦ ЭКРАНА АВТОРИЗАЦИИ ===== -->
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div><div class="logo-text">EduPath AI</div><div class="logo-sub">ПГУТИ — Подбор направлений</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="goTab('chat')" id="sn-chat">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Новый чат
+    </div>
+    <div class="nav-item" onclick="goTab('chat')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>История
+    </div>
+    <div class="nav-item" onclick="goTab('analytics')" id="sn-analytics">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Аналитика
+    </div>
+    <div class="nav-item" onclick="goTab('recs')" id="sn-recs">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>Рекомендации
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="nav-sm"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Настройки</div>
+    <div class="nav-sm"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Помощь</div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <nav class="top-nav">
+      <div class="top-tab" onclick="goTab('chat')">Главная</div>
+      <div class="top-tab active" id="tt-chat" onclick="goTab('chat')">Чат</div>
+      <div class="top-tab" id="tt-recs" onclick="goTab('recs')">Рекомендации</div>
+    </nav>
+    <div class="topbar-right">
+      <button class="icon-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+      <button class="icon-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg></button>
+      <button class="btn-go" onclick="goTab('chat')">Начать</button>
+    </div>
+  </header>
+
+  <div class="content" id="pageContent">
+
+    <!-- CHAT -->
+    <div id="page-chat" class="chat-wrap">
+      <div class="chat-messages" id="chatMsgs"></div>
+      <div>
+        <div class="chat-input-bar">
+          <input type="text" id="chatIn" placeholder="Напиши сообщение или выбери вариант выше..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+          <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+        <p class="chat-note">EduPath AI собирает анкету для подбора направлений ПГУТИ. Данные не сохраняются.</p>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="page-analytics" style="display:none;">
+      <div class="an-header">
+        <div class="an-title"><h1>Твой профиль интересов</h1><p>Анализ на основе заполненной анкеты.</p></div>
+        <button class="share-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Поделиться</button>
+      </div>
+      <div class="an-grid">
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Баланс компетенций</span></div>
+          <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="card skill-section">
+          <div class="skills-hd">Прогресс навыков</div>
+          <div class="sk-row">
+            <div class="sk-label"><span>Технические</span><span id="hard-pct">–</span></div>
+            <div class="sk-bar"><div class="sk-fill hard" id="hard-bar" style="width:0%"></div></div>
+          </div>
+          <div class="sk-row">
+            <div class="sk-label"><span>Гибкие</span><span id="soft-pct">–</span></div>
+            <div class="sk-bar"><div class="sk-fill soft" id="soft-bar" style="width:0%"></div></div>
+          </div>
+          <div class="sk-row">
+            <div class="sk-label"><span>IT-уровень</span><span id="it-pct">–</span></div>
+            <div class="sk-bar"><div class="sk-fill it" id="it-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="resume-card">
+        <div class="resume-hd">
+          <div class="resume-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+          <span class="resume-lbl">Аналитическое резюме</span>
+        </div>
+        <p class="resume-text" id="resumeText">Заполните анкету в чате, чтобы получить персональный анализ.</p>
+        <p class="resume-why">На основе ответов</p>
+        <ul class="resume-bullets" id="resumeBullets"></ul>
+      </div>
+      <div class="dir-cards" id="analyticsDirCards"></div>
+      <div class="pf" style="margin:24px -28px -24px;">
+        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2024. Помогаем выбрать путь.</span></div>
+        <div class="pf-links"><a href="#">Конфиденциальность</a><a href="#">Контакты</a><a href="#">О системе</a></div>
+      </div>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <div id="page-recs" style="display:none;">
+      <div class="rec-hd">
+        <h1>Рекомендуемые направления для тебя</h1>
+        <p>На основе твоего профиля мы подобрали наиболее подходящие программы ПГУТИ.</p>
+      </div>
+      <div class="rec-layout">
+        <div class="filter-card">
+          <div class="filt-title"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Фильтры</div>
+          <div class="filt-group">
+            <div class="filt-lbl">Уровень обучения</div>
+            <select class="filt-select" id="f-level" onchange="renderProgs()">
+              <option value="">Все уровни</option>
+              <option value="bachelor">Бакалавриат</option>
+              <option value="master">Магистратура</option>
+            </select>
+          </div>
+          <div class="filt-group">
+            <div class="filt-lbl">Факультет</div>
+            <select class="filt-select" id="f-faculty" onchange="renderProgs()">
+              <option value="">Все факультеты</option>
+              <option value="Ф1">Ф1 — ИТ и безопасность</option>
+              <option value="Ф2">Ф2 — ИС и технологии</option>
+              <option value="Ф3">Ф3 — Прикладная информатика</option>
+            </select>
+          </div>
+          <div class="filt-group">
+            <div class="filt-lbl">Мин. баллы ЕГЭ</div>
+            <div class="range-info"><span>от <span id="ege-val">0</span></span><span>320</span></div>
+            <input type="range" min="0" max="320" value="0" step="10" id="f-ege" oninput="document.getElementById('ege-val').textContent=this.value;renderProgs()"/>
+          </div>
+          <div class="filt-group">
+            <div class="filt-lbl">Теги / направления</div>
+            <div class="tags-wrap" id="tagFilters"></div>
+          </div>
+          <button class="reset-btn" onclick="resetFilters()">Сбросить фильтры</button>
+        </div>
+        <div class="prog-grid" id="progGrid"></div>
+      </div>
+      <div class="pf" style="margin:24px -28px -24px;">
+        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2024. Помогаем выбрать путь.</span></div>
+        <div class="pf-links"><a href="#">Конфиденциальность</a><a href="#">Контакты</a><a href="#">О системе</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// КАТАЛОГ НАПРАВЛЕНИЙ ПГУТИ (из directions_catalog.json)
+// ================================================================
+const CATALOG = [
+  {id:0,code:"02.03.03",title:"Математическое и программное обеспечение интеллектуальных систем",faculty:"Ф1",level:"bachelor",short:"Подготовка специалистов в области ИИ, анализа данных и машинного обучения.",careers:["Программист","Специалист по информационным системам","Специалист по большим данным","Системный администратор"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["ИИ","большие данные","машинное обучение","программирование","управление системами"],icon:"🧠",minScore:130},
+  {id:1,code:"09.03.01",title:"Программирование и управление робототехническими системами",faculty:"Ф1",level:"bachelor",short:"Подготовка специалистов по программированию и управлению робототехническими системами на Python, C#, C++.",careers:["Специалист по информационным системам","Системный аналитик","Системный программист","Инженер-программист"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["Python","программирование","робототехника","управление системами"],icon:"🤖",minScore:140},
+  {id:2,code:"09.03.01",title:"Разработка веб-систем и мобильных приложений",faculty:"Ф1",level:"bachelor",short:"Практико-ориентированная подготовка разработчиков веб- и мобильных приложений полного цикла.",careers:["Программист","Веб-разработчик","Специалист по тестированию ПО","DevOps-инженер","Специалист по технической поддержке"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["Python","веб-разработка","мобильная разработка","управление системами"],icon:"💻",minScore:130},
+  {id:3,code:"09.03.04",title:"Разработка программно-информационных систем",faculty:"Ф1",level:"bachelor",short:"Полный цикл разработки ПО от сбора требований до тестирования и управления проектом.",careers:["Программист","Системный программист","Системный архитектор","Системный администратор","Руководитель IT-проектов"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["Python","веб-разработка","мобильная разработка","программирование","управление системами"],icon:"⚙️",minScore:145},
+  {id:4,code:"09.04.01",title:"Веб-инженерия (магистратура)",faculty:"Ф1",level:"master",short:"Углублённое изучение разработки, безопасности и управления веб-приложениями. Особый акцент на привлечении финансирования для стартапа.",careers:["Архитектор веб-систем","Веб-аналитик","UX/UI-специалист","Руководитель веб-проектов"],exams:["Экзамен в форме собеседования по билетам"],tags:["аналитика данных","веб-разработка","геймдев","управление системами"],icon:"🌐",minScore:0},
+  {id:5,code:"09.04.04",title:"Аналитика больших данных (магистратура)",faculty:"Ф1",level:"master",short:"Структурирование и анализ больших данных, Python, ML-инструменты, параллельные вычисления.",careers:["Аналитик данных","Data Scientist","ML-инженер","Разработчик ПО"],exams:["По расписанию вступительных испытаний"],tags:["Python","аналитика данных","бизнес","управление системами"],icon:"📊",minScore:0},
+  {id:6,code:"10.03.01",title:"Безопасность телекоммуникационных систем",faculty:"Ф1",level:"bachelor",short:"Технические и программные средства защиты информации, криптография, ИБ телекоммуникаций.",careers:["Специалист по информационной безопасности","Инженер по защите информации","Инженер-программист по технической защите"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["безопасность","сетевые технологии","телекоммуникации","управление системами"],icon:"🔐",minScore:135},
+  {id:7,code:"10.04.01",title:"Информационная безопасность (магистратура)",faculty:"Ф1",level:"master",short:"Углублённое образование в области обеспечения ИБ и защиты информации по российским и международным стандартам.",careers:["Руководитель отдела ИБ","Аудитор ИБ","Администратор защищённых систем"],exams:["По расписанию вступительных испытаний"],tags:["безопасность","телекоммуникации","управление системами"],icon:"🛡️",minScore:0},
+  {id:8,code:"10.05.02",title:"Управление безопасностью телекоммуникационных систем",faculty:"Ф1",level:"bachelor",short:"Методы защиты информации, безопасность сетевой инфраструктуры, криптография, комплексные системы ЗИ.",careers:["Инженер по защите информации","Специалист по защите информации","Ведущий разработчик систем ЗИ","Руководитель отдела систем ЗИ"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["безопасность","мобильная разработка","сетевые технологии","телекоммуникации","управление системами"],icon:"🔒",minScore:150},
+  {id:9,code:"11.04.02",title:"Разработка робототехнических систем (магистратура)",faculty:"Ф1",level:"master",short:"Проектирование, программирование и управление промышленными робототехническими комплексами.",careers:["Инженер-робототехник","Разработчик систем управления","Проектировщик робототехнических комплексов"],exams:["По расписанию вступительных испытаний"],tags:["программирование","робототехника","управление системами"],icon:"🦾",minScore:0},
+  {id:10,code:"27.03.04",title:"Цифровые системы управления",faculty:"Ф1",level:"bachelor",short:"Разработка и управление робототехническими устройствами и программно-конфигурируемыми сетями (SDN).",careers:["Системный администратор","Специалист по поддержке SDN-сетей","Инженер по автоматизации"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["Python","программирование","робототехника","управление системами"],icon:"🎛️",minScore:130},
+  {id:12,code:"09.03.02",title:"Интеллектуальные информационные системы и технологии",faculty:"Ф2",level:"bachelor",short:"Проектирование и разработка интеллектуальных ИС на базе методов ИИ, Big Data, ML.",careers:["Системный аналитик","Специалист по Big Data","Специалист по машинному обучению","Разработчик и администратор БД","Сетевой администратор"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["аналитика данных","веб-разработка","мобильная разработка","управление системами"],icon:"🔮",minScore:135},
+  {id:13,code:"09.03.02",title:"Разработка игр и мультимедийных приложений",faculty:"Ф2",level:"bachelor",short:"Разработка игр, VR/AR-приложений, геймдизайн, 3D-моделирование для различных платформ.",careers:["Разработчик игр","Геймдизайнер","3D-моделлер","Специалист по продвижению игр","Тестировщик игр"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["ИИ","аналитика данных","веб-разработка","геймдев","мобильная разработка","программирование"],icon:"🎮",minScore:125},
+  {id:14,code:"09.04.02",title:"Искусственный интеллект в промышленности (магистратура)",faculty:"Ф2",level:"master",short:"Внедрение AI-технологий в промышленность: компьютерное зрение, предиктивная аналитика, логистика.",careers:["Руководитель IT-проектов","Системный аналитик","Специалист по Big Data"],exams:["Программы вступительных испытаний"],tags:["ИИ","аналитика данных","логистика","машинное обучение"],icon:"🏭",minScore:0},
+  {id:15,code:"09.04.02",title:"Прикладной искусственный интеллект и наука о данных (магистратура)",faculty:"Ф2",level:"master",short:"Подготовка AI-специалистов для бизнеса, промышленности и государственного управления.",careers:["Руководитель IT-проектов","Системный аналитик","Data Scientist"],exams:["Программы вступительных испытаний"],tags:["ИИ","аналитика данных","бизнес","программирование","управление системами"],icon:"🤖",minScore:0},
+  {id:16,code:"09.04.03",title:"Инженерия искусственного интеллекта (магистратура)",faculty:"Ф2",level:"master",short:"Практическая разработка отечественных AI-решений совместно с IT-компанией «Открытый код».",careers:["ML Engineer","CV Engineer","NLP Engineer","VR/AR-разработчик","AI Product Manager","Руководитель IT-проекта","Бизнес-аналитик","Системный аналитик"],exams:["Программы вступительных испытаний"],tags:["Python","ИИ","аналитика данных","бизнес","менеджмент","управление системами","финтех"],icon:"⚡",minScore:0},
+  {id:18,code:"09.03.03",title:"Аналитика и цифровизация бизнес-процессов",faculty:"Ф3",level:"bachelor",short:"Бизнес-анализ, системный анализ, цифровая трансформация, 1С, реинжиниринг процессов.",careers:["Бизнес-аналитик","Системный аналитик","Программист 1С","Консультант 1С","Разработчик и администратор БД","Системный администратор"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["аналитика данных","бизнес","менеджмент","программирование","управление системами","цифровизация"],icon:"📋",minScore:130},
+  {id:19,code:"09.03.03",title:"Цифровые клиентские сервисы и почтово-логистические технологии",faculty:"Ф3",level:"bachelor",short:"Разработка цифровых клиентских сервисов, логистические системы, электронная коммерция.",careers:["Системный аналитик","Специалист по UX","Специалист по логистическим системам"],exams:["Русский язык","Математика","Физика или Информатика"],tags:["аналитика данных","бизнес","логистика","управление системами"],icon:"📦",minScore:120},
+  {id:20,code:"09.04.03",title:"Цифровые решения и управление экосистемами (магистратура)",faculty:"Ф3",level:"master",short:"Управление цифровыми экосистемами предприятия, ERP/CRM, цифровая трансформация бизнеса.",careers:["Digital-трансформатор","Руководитель цифровых проектов"],exams:["По расписанию вступительных испытаний"],tags:["аналитика данных","бизнес","управление системами","цифровизация"],icon:"🌿",minScore:0},
+];
+
+const ALL_TAGS = [...new Set(CATALOG.flatMap(d=>d.tags))].sort();
+let activeTags = new Set();
+let currentApplicant = {};
+let recommendedIds = [];
+window._scores = {};
+
+// ================================================================
+// ЧАТ — диалог-анкета, повторяющий логику recommender.py
+// ================================================================
+const STEPS = [
+  {id:'greeting'},
+  {id:'type', chips:['Бакалавриат','Магистратура']},
+  {id:'ege'},
+  {id:'work_format', chips:['За компьютером (разработка, аналитика, дизайн)','Руками / в поле (инженер, монтаж, оборудование)','С людьми (менеджмент, коммуникации, продажи)','Ещё не определился(ась)']},
+  {id:'it_level', chips:['Никогда не программировал(а)','Пробовал(а) — писал(а) простые скрипты, делал(а) сайты','Уверенно пишу код на одном или нескольких языках','Не связываю себя с программированием']},
+  {id:'interests'},
+  {id:'done'},
+];
+let stepIdx = 0;
+let waitingInput = false;
+
+function getBotText(id){
+  if(id==='greeting') return `Привет! 👋 Я помогу подобрать подходящее направление в <b>ПГУТИ</b>.\n\nОтвечу на вопросы по каждой программе и подберу лучшие варианты под твой профиль. Для начала — как тебя зовут?`;
+  if(id==='type') return `Приятно познакомиться, <b>${currentApplicant.name}</b>! 🎓\n\nКуда планируешь поступать?`;
+  if(id==='ege') return currentApplicant.type==='Бакалавриат'
+    ? `Хорошо! Введи свои баллы ЕГЭ — я учту минимальные проходные баллы программ.\n<span style="font-size:12px;color:var(--text3)">Можно пропустить предметы, которые не сдавал(а).</span>`
+    : `Расскажи, по какой специальности или направлению у тебя диплом бакалавра? Это поможет точнее подобрать магистратуру.`;
+  if(id==='work_format') return `Понял! Теперь расскажи — в каком формате хочешь работать?`;
+  if(id==='it_level') return `Ясно! Какой у тебя уровень IT-подготовки?`;
+  if(id==='interests') return `Отлично! Последний вопрос — расскажи о своих интересах и чем хочешь заниматься.\n\n<span style="font-size:12px;color:var(--text3)">Например: «хочу заниматься кибербезопасностью», «интересует ИИ и аналитика данных», «хочу создавать приложения».</span>`;
+  return null;
+}
+
+function makeChipsHTML(labels){
+  return `<div class="chips">${labels.map(l=>`<button class="chip" onclick="pickChip(this,'${l.replace(/'/g,"&#39;")}')">${l}</button>`).join('')}</div>`;
+}
+
+function makeEgeFormHTML(){
+  const subs=[['Русский язык','rus'],['Математика (проф.)','math'],['Физика','phys'],['Информатика и ИКТ','cs'],['Обществознание','soc'],['История','hist']];
+  return `<div class="ege-grid">${subs.map(([n,id])=>`<div class="ege-row"><label class="ege-label">${n}</label><input class="ege-input" type="number" id="ege-${id}" min="0" max="100" placeholder="–"></div>`).join('')}</div><button class="submit-btn" onclick="submitEge()">Подтвердить баллы</button>`;
+}
+
+function addBotMsg(html, extras=''){
+  return new Promise(res=>{
+    const msgs=document.getElementById('chatMsgs');
+    const t=document.createElement('div');
+    t.className='msg';t.id='_typing';
+    t.innerHTML=`<div class="av">Э</div><div class="msg-body"><div class="msg-who">EduPath Ассистент</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+    msgs.appendChild(t);msgs.scrollTop=msgs.scrollHeight;
+    setTimeout(()=>{
+      t.remove();
+      const d=document.createElement('div');
+      d.className='msg';
+      d.innerHTML=`<div class="av">Э</div><div class="msg-body"><div class="msg-who">EduPath Ассистент</div><div class="bubble">${html}${extras}</div></div>`;
+      msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+      res();
+    },800);
+  });
+}
+
+function addUserMsg(text){
+  const msgs=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='msg um';
+  d.innerHTML=`<div class="av u">Я</div><div class="msg-body"><div class="msg-who" style="text-align:right">Вы</div><div class="bubble">${text}</div></div>`;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function nextStep(){
+  const step=STEPS[stepIdx];
+  const html=getBotText(step.id);
+  if(html===null){finishAnketa();return;}
+  let extras='';
+  if(step.chips) extras=makeChipsHTML(step.chips);
+  if(step.id==='ege'&&currentApplicant.type==='Бакалавриат') extras=makeEgeFormHTML();
+  await addBotMsg(html,extras);
+  if(!step.chips&&!(step.id==='ege'&&currentApplicant.type==='Бакалавриат')) waitingInput=true;
+}
+
+function pickChip(el,val){
+  el.closest('.chips').querySelectorAll('.chip').forEach(c=>{c.classList.remove('sel');c.disabled=true;});
+  el.classList.add('sel');
+  addUserMsg(val);
+  const id=STEPS[stepIdx].id;
+  if(id==='type') currentApplicant.type=val;
+  else if(id==='work_format') currentApplicant.workFormat=val;
+  else if(id==='it_level') currentApplicant.itLevel=val;
+  stepIdx++;
+  setTimeout(nextStep,400);
+}
+
+function submitEge(){
+  const map={rus:'Русский язык',math:'Математика (профильная)',phys:'Физика',cs:'Информатика и ИКТ',soc:'Обществознание',hist:'История'};
+  const scores={};
+  Object.entries(map).forEach(([k,n])=>{const v=document.getElementById('ege-'+k)?.value;if(v&&+v>0)scores[n]=+v;});
+  currentApplicant.egeScores=scores;
+  document.querySelectorAll('.ege-input').forEach(e=>e.disabled=true);
+  document.querySelector('.submit-btn') && (document.querySelector('.submit-btn').disabled=true);
+  const sum=Object.entries(scores).map(([s,v])=>`${s}: ${v}`).join(', ')||'не указаны';
+  addUserMsg('Баллы ЕГЭ: '+sum);
+  stepIdx++;setTimeout(nextStep,400);
+}
+
+async function sendMsg(){
+  if(!waitingInput)return;
+  const inp=document.getElementById('chatIn');
+  const v=inp.value.trim();if(!v)return;
+  inp.value='';waitingInput=false;
+  addUserMsg(v);
+  const id=STEPS[stepIdx].id;
+  if(id==='greeting') currentApplicant.name=v;
+  else if(id==='ege'&&currentApplicant.type==='Магистратура') currentApplicant.prevEdu=v;
+  else if(id==='interests') currentApplicant.interests=v;
+  stepIdx++;setTimeout(nextStep,400);
+}
+
+async function finishAnketa(){
+  computeRecommendations();
+  const top3=recommendedIds.slice(0,3).map(id=>CATALOG.find(d=>d.id===id)).filter(Boolean);
+  const names=top3.map(d=>`<b>${d.title}</b>`).join(', ');
+  await addBotMsg(`Готово! 🎉 Я проанализировал твой профиль и подобрал направления.\n\nТоп-3: ${names||'несколько программ ПГУТИ'}.\n\nПерейди в раздел <b>Рекомендации</b> для полного списка или в <b>Аналитику</b> для просмотра своего профиля.`);
+  updateAnalytics();
+  const msgs=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='msg';
+  d.innerHTML=`<div class="av">Э</div><div class="msg-body"><div class="msg-who">EduPath Ассистент</div><div class="bubble" style="background:var(--navy);color:#fff;border-color:var(--navy)">
+    <div class="pbar-wrap"><div class="pbar-lbl">Анкета заполнена — профиль готов ✓</div><div class="pbar-track"><div class="pbar-fill" style="width:100%"></div></div></div>
+    <div style="display:flex;gap:9px;margin-top:12px">
+      <button onclick="goTab('analytics')" style="flex:1;background:var(--teal);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Аналитика профиля</button>
+      <button onclick="goTab('recs')" style="flex:1;background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Все рекомендации</button>
+    </div>
+  </div></div>`;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ================================================================
+// СКОРИНГ — упрощённая версия логики из recommender.py
+// Имитирует косинусный поиск по тегам + фильтр ЕГЭ
+// ================================================================
+const TAG_KEYS={
+  'ИИ':['искусственный интеллект','ии','нейро','машинное обучение','ai','neural'],
+  'Python':['python','питон','программ','код','скрипт','разработ'],
+  'веб-разработка':['веб','сайт','frontend','backend','javascript','html','css'],
+  'мобильная разработка':['мобил','android','ios','приложен','kotlin','swift'],
+  'геймдев':['игр','game','геймдев','unity','unreal','3d','анимац'],
+  'робототехника':['робот','механ','arduino','автомат','беспилот','дрон','бпла'],
+  'безопасность':['безопасн','крипто','защит','security','хакер','взлом','пентест'],
+  'аналитика данных':['аналит','данн','data','статист','excel','tableau','отчёт'],
+  'бизнес':['бизнес','эконом','продажи','маркетинг','финанс'],
+  'телекоммуникации':['связ','телеком','сигнал','радио','сеть','5g'],
+  'логистика':['логист','почт','доставк','склад','цепоч'],
+  'цифровизация':['цифров','digital','трансформ','erp','crm','1с'],
+  'менеджмент':['менедж','управ','project','agile','scrum','продукт'],
+  'большие данные':['bigdata','большие данные','hadoop','spark','kafka'],
+  'машинное обучение':['машинное обучение','ml','нейронн','pytorch','tensorflow','sklearn'],
+  'сетевые технологии':['сеть','cisco','vpn','firewall','маршрутиз','коммутат'],
+  'управление системами':['управлен','систем','автомат','контроллер','микроконтроллер'],
+};
+
+function scoreDir(dir){
+  const text=((currentApplicant.interests||'')+' '+(currentApplicant.workFormat||'')+' '+(currentApplicant.prevEdu||'')).toLowerCase();
+  let sc=40;
+  dir.tags.forEach(tag=>{
+    const kws=TAG_KEYS[tag]||[];
+    if(kws.some(kw=>text.includes(kw))) sc+=18;
+  });
+  const wf=(currentApplicant.workFormat||'').toLowerCase();
+  if(wf.includes('компьютер')&&['программирование','веб-разработка','аналитика данных','ИИ','машинное обучение'].some(t=>dir.tags.includes(t))) sc+=22;
+  if(wf.includes('людьми')&&['бизнес','менеджмент','цифровизация'].some(t=>dir.tags.includes(t))) sc+=22;
+  if(wf.includes('руками')&&['робототехника','телекоммуникации','сетевые технологии'].some(t=>dir.tags.includes(t))) sc+=22;
+  const it=currentApplicant.itLevel||'';
+  if(it.includes('Уверенно')) sc+=25;
+  else if(it.includes('простые')||it.includes('Пробовал')) sc+=12;
+  else if(it.includes('Не связываю')) sc-=5;
+  if(currentApplicant.type==='Магистратура'&&dir.level==='master') sc+=30;
+  if(currentApplicant.type==='Бакалавриат'&&dir.level==='bachelor') sc+=15;
+  if(currentApplicant.egeScores&&dir.level==='bachelor'&&dir.minScore>0){
+    const total=Object.values(currentApplicant.egeScores).reduce((a,b)=>a+b,0);
+    if(total>0&&total<dir.minScore) sc-=50;
+  }
+  return Math.min(98, Math.max(8, Math.round(sc)));
+}
+
+function computeRecommendations(){
+  const scored=CATALOG.map(d=>({id:d.id,sc:scoreDir(d)}));
+  scored.sort((a,b)=>b.sc-a.sc);
+  recommendedIds=scored.map(d=>d.id);
+  scored.forEach(d=>{window._scores[d.id]=d.sc;});
+}
+
+// ================================================================
+// АНАЛИТИКА
+// ================================================================
+// Ключевые слова для каждой оси радара
+const RADAR_KEYS = {
+  technical: ['программ','код','разработ','инженер','алгоритм','python','c++','java','backend','frontend','сервер','базы данных','sql','linux','сеть','hardware','микроконтроллер','схемотехник','электроник','робот','автомат','arduino','3d','моделирован','чертёж','физик','математик'],
+  social:    ['люди','команд','общени','коммуникац','менедж','управл','продаж','клиент','переговор','hr','волонтёр','организ','лидер','обучен','преподав','помощ','сервис','поддержк','консульт','маркетинг','pr','связи с обществ'],
+  creative:  ['дизайн','творч','рисов','арт','график','анимац','ux','ui','интерфейс','игр','геймдев','видео','фото','медиа','музык','контент','визуал','брендинг','иллюстрац','3d','моделирован','vr','ar','иммерсив','стиль'],
+  analytics: ['аналит','данн','статист','исследован','отчёт','excel','tableau','bi','data','метрик','оптимизац','эффективн','прогноз','модел','логик','задач','цифр','excel','финанс','бухгалт','экономик','бизнес-процесс','kpi','план'],
+  it:        ['python','javascript','c++','c#','java','kotlin','swift','php','sql','html','css','git','linux','docker','api','машинное обучение','нейросет','ии','ml','ai','программирован','код','разработ','алгоритм','база данных','веб','мобильн','devops','cloud','облак'],
+};
+
+function countKeywords(text, keys){
+  const t = text.toLowerCase();
+  return keys.filter(k => t.includes(k)).length;
+}
+
+function computeRadarScores(){
+  const interests = (currentApplicant.interests || '').toLowerCase();
+  const wf        = (currentApplicant.workFormat || '').toLowerCase();
+  const it        = currentApplicant.itLevel || '';
+  const prevEdu   = (currentApplicant.prevEdu || '').toLowerCase();
+  const allText   = interests + ' ' + wf + ' ' + prevEdu;
+
+  // --- Технические навыки ---
+  let technical = 25;
+  const techHits = countKeywords(allText, RADAR_KEYS.technical);
+  technical += Math.min(techHits * 7, 40);
+  if(wf.includes('компьютер')) technical += 15;
+  if(wf.includes('руками'))    technical += 12;
+
+  // --- Социальные навыки ---
+  let social = 25;
+  const socHits = countKeywords(allText, RADAR_KEYS.social);
+  social += Math.min(socHits * 8, 45);
+  if(wf.includes('людьми')) social += 20;
+
+  // --- Творческие навыки ---
+  let creative = 20;
+  const creHits = countKeywords(allText, RADAR_KEYS.creative);
+  creative += Math.min(creHits * 9, 50);
+
+  // --- Аналитика ---
+  let analytics = 25;
+  const anaHits = countKeywords(allText, RADAR_KEYS.analytics);
+  analytics += Math.min(anaHits * 8, 40);
+  if(wf.includes('компьютер')) analytics += 10;
+  // ЕГЭ по математике → аналитика выше
+  if(currentApplicant.egeScores){
+    const math = currentApplicant.egeScores['Математика (профильная)'] || 0;
+    if(math >= 80) analytics += 15;
+    else if(math >= 60) analytics += 8;
+  }
+
+  // --- IT-навыки ---
+  let itSc = 15;
+  if(it.includes('Уверенно'))                          itSc = 88;
+  else if(it.includes('простые')||it.includes('Пробовал')) itSc = 55;
+  else if(it.includes('Не связываю'))                  itSc = 12;
+  else if(it.includes('Никогда'))                      itSc = 18;
+  const itHits = countKeywords(allText, RADAR_KEYS.it);
+  itSc = Math.min(itSc + itHits * 4, 97);
+
+  // Нормализация 0–95
+  const clamp = v => Math.min(95, Math.max(10, Math.round(v)));
+  return {
+    technical: clamp(technical),
+    social:    clamp(social),
+    creative:  clamp(creative),
+    analytics: clamp(analytics),
+    it:        clamp(itSc),
+  };
+}
+
+function updateAnalytics(){
+  const it = currentApplicant.itLevel || '';
+  const wf = currentApplicant.workFormat || '';
+  const scores = computeRadarScores();
+
+  // Прогресс-бары (используем технические + IT + социальные)
+  const hard = scores.technical;
+  const soft = scores.social;
+  const itSc = scores.it;
+  ['hard-bar','soft-bar','it-bar'].forEach((id,i)=>{
+    document.getElementById(id).style.width = [hard,soft,itSc][i]+'%';
+  });
+  document.getElementById('hard-pct').textContent = hard+'%';
+  document.getElementById('soft-pct').textContent = soft+'%';
+  document.getElementById('it-pct').textContent   = itSc+'%';
+
+  // Резюме
+  document.getElementById('resumeText').textContent =
+    `Имя: ${currentApplicant.name||'—'}\nТип поступления: ${currentApplicant.type||'—'}\nФормат работы: ${wf||'—'}\nIT-уровень: ${it||'—'}\nИнтересы: ${currentApplicant.interests||'—'}`;
+
+  // Динамические инсайты на основе доминирующих осей
+  const insights = [];
+  const s = scores;
+  if(s.technical >= 60) insights.push('Выраженная склонность к технической работе');
+  if(s.it >= 70)        insights.push('Хороший уровень IT-подготовки');
+  if(s.social >= 60)    insights.push('Ориентация на командную и коммуникативную работу');
+  if(s.creative >= 55)  insights.push('Творческий потенциал — интерес к дизайну или медиа');
+  if(s.analytics >= 60) insights.push('Аналитическое мышление — склонность к работе с данными');
+  if(wf.includes('руками')) insights.push('Интерес к практической инженерной работе');
+  if(currentApplicant.egeScores && Object.keys(currentApplicant.egeScores).length)
+    insights.push('Баллы ЕГЭ учтены при фильтрации программ');
+  if(!insights.length) insights.push('Заполни все поля анкеты для точного анализа');
+
+  const bl = document.getElementById('resumeBullets');
+  bl.innerHTML = '';
+  insights.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; bl.appendChild(li); });
+
+  // Топ-3 карточки направлений
+  const top3 = recommendedIds.slice(0,3);
+  document.getElementById('analyticsDirCards').innerHTML = top3.map((id,i)=>{
+    const d = CATALOG.find(x=>x.id===id); if(!d) return '';
+    return `<div class="dir-card${i===0?' hl':''}" onclick="openModal(${d.id})">
+      <div class="dir-ico">${d.icon}</div>
+      <div class="dir-name">${d.title}</div>
+      <div class="dir-desc">${d.short}</div>
+      <div class="dir-code">${d.code} · ${d.faculty} · ${d.level==='bachelor'?'Бакалавриат':'Магистратура'}</div>
+    </div>`;
+  }).join('');
+
+  if(window._radarDone) drawRadar(scores);
+}
+
+function drawRadar(scores={technical:50,social:50,creative:50,analytics:50,it:50}){
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  if(window._ri) window._ri.destroy();
+  window._ri = new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:['Техническое','Социальное','Творческое','Аналитика','IT-навыки'],
+      datasets:[{
+        data:[scores.technical, scores.social, scores.creative, scores.analytics, scores.it],
+        backgroundColor:'rgba(30,200,160,0.18)',
+        borderColor:'#1ec8a0',
+        borderWidth:2,
+        pointBackgroundColor:'#1ec8a0',
+        pointRadius:5,
+        pointHoverRadius:7,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx => ` ${ctx.raw}%`
+          }
+        }
+      },
+      scales:{r:{
+        ticks:{display:false, stepSize:20},
+        grid:{color:'rgba(0,0,0,0.07)'},
+        pointLabels:{font:{size:11,family:'Manrope'},color:'#4a5568'},
+        min:0, max:100
+      }}
+    }
+  });
+}
+
+// ================================================================
+// РЕКОМЕНДАЦИИ
+// ================================================================
+function buildTagFilters(){
+  document.getElementById('tagFilters').innerHTML=ALL_TAGS.map(t=>
+    `<button class="tag-btn" onclick="toggleTag('${t}',this)">${t}</button>`).join('');
+}
+function toggleTag(tag,btn){
+  activeTags.has(tag)?activeTags.delete(tag):activeTags.add(tag);
+  btn.classList.toggle('on',activeTags.has(tag));
+  renderProgs();
+}
+function resetFilters(){
+  document.getElementById('f-level').value='';
+  document.getElementById('f-faculty').value='';
+  document.getElementById('f-ege').value=0;
+  document.getElementById('ege-val').textContent='0';
+  activeTags.clear();
+  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('on'));
+  renderProgs();
+}
+
+function matchCls(s){return s>=80?'h':s>=60?'m':'l';}
+function matchLbl(s){return s>=80?'Высокое':s>=60?'Среднее':'Близкое';}
+
+function renderProgs(){
+  const lv=document.getElementById('f-level').value;
+  const fc=document.getElementById('f-faculty').value;
+  const eg=+document.getElementById('f-ege').value||0;
+  let list=CATALOG.filter(d=>{
+    if(lv&&d.level!==lv)return false;
+    if(fc&&d.faculty!==fc)return false;
+    if(eg>0&&d.minScore>0&&d.minScore>eg)return false;
+    if(activeTags.size>0&&![...activeTags].some(t=>d.tags.includes(t)))return false;
+    return true;
+  });
+  if(Object.keys(window._scores).length) list.sort((a,b)=>(window._scores[b.id]||50)-(window._scores[a.id]||50));
+  const grid=document.getElementById('progGrid');
+  if(!list.length){grid.innerHTML=`<div class="no-res">По заданным фильтрам ничего не найдено. Попробуйте изменить параметры.</div>`;return;}
+  grid.innerHTML=list.map(d=>{
+    const sc=window._scores[d.id]||52;
+    const mc=matchCls(sc);
+    const lvBadge=d.level==='bachelor'?'<span class="lvl-b">Бакалавриат</span>':'<span class="lvl-m">Магистратура</span>';
+    return `<div class="prog-card">
+      <div class="prog-top">
+        <div class="prog-ico" style="background:${mc==='h'?'#e0f8f2':mc==='m'?'#dbeafe':'#ede9fe'}">${d.icon}</div>
+        <span class="match-badge ${mc}"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>${sc}% ${matchLbl(sc)}</span>
+      </div>
+      <div class="prog-code">${d.code} · ${d.faculty} · ${lvBadge}</div>
+      <div class="prog-name">${d.title}</div>
+      <div class="prog-desc">${d.short}</div>
+      <div class="prog-tags">${d.tags.slice(0,3).map(t=>`<span class="pt">${t}</span>`).join('')}</div>
+      <button class="detail-btn" onclick="openModal(${d.id})">Подробнее</button>
+    </div>`;
+  }).join('');
+}
+
+// ================================================================
+// МОДАЛЬНОЕ ОКНО С ДЕТАЛЯМИ НАПРАВЛЕНИЯ
+// ================================================================
+function openModal(id){
+  const d=CATALOG.find(x=>x.id===id);if(!d)return;
+  const sc=window._scores[id]||0;
+  document.getElementById('modalContent').innerHTML=`
+    <h2>${d.icon} ${d.title}</h2>
+    <p class="modal-meta">${d.code} · ${d.faculty} · ${d.level==='bachelor'?'Бакалавриат (4 года)':'Магистратура (2 года)'}${sc?` · <b style="color:var(--teal)">${sc}% совпадение</b>`:''}</p>
+    <div class="msec"><h3>Описание программы</h3><p style="font-size:13px;color:var(--text2);line-height:1.65">${d.short}</p></div>
+    ${d.careers.length?`<div class="msec"><h3>Карьерные пути</h3><ul>${d.careers.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+    ${d.exams.length?`<div class="msec"><h3>Вступительные испытания</h3><ul>${d.exams.map(e=>`<li>${e}</li>`).join('')}</ul></div>`:''}
+    <div class="msec"><h3>Направления</h3><div class="chips" style="margin-top:0">${d.tags.map(t=>`<span class="chip sel" style="cursor:default;font-size:11px;padding:4px 10px;pointer-events:none">${t}</span>`).join('')}</div></div>
+    ${d.minScore?`<div class="msec"><h3>Мин. сумма ЕГЭ для ориентира</h3><p style="font-size:13px;color:var(--text2)">Ориентировочно от ${d.minScore} баллов (сумма трёх предметов)</p></div>`:''}
+  `;
+  document.getElementById('modalBg').style.display='flex';
+}
+function closeModal(){document.getElementById('modalBg').style.display='none';}
+
+// ================================================================
+// НАВИГАЦИЯ
+// ================================================================
+function goTab(tab){
+  ['chat','analytics','recs'].forEach(t=>document.getElementById('page-'+t).style.display='none');
+  document.getElementById('page-'+tab).style.display=tab==='chat'?'flex':'block';
+  document.querySelectorAll('.top-tab').forEach(t=>t.classList.remove('active'));
+  if(tab==='chat') document.getElementById('tt-chat').classList.add('active');
+  if(tab==='recs') document.getElementById('tt-recs').classList.add('active');
+  ['chat','analytics','recs'].forEach(t=>{
+    const el=document.getElementById('sn-'+t);if(el)el.classList.toggle('active',t===tab);
+  });
+  if(tab==='recs') renderProgs();
+  if(tab==='analytics'&&!window._radarDone){window._radarDone=true;setTimeout(()=>drawRadar(computeRadarScores()),150);}
+}
+
+// ================================================================
+// АВТОРИЗАЦИЯ
+// ================================================================
+// Простое in-memory хранилище пользователей (для демо)
+// В реальном проекте заменить на вызовы Flask API /register, /login
+const USERS_DB = {};
+let currentUser = null;
+
+function switchToRegister(){
+  document.getElementById('authContainer').classList.add('active');
+}
+function switchToLogin(){
+  document.getElementById('authContainer').classList.remove('active');
+}
+
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginError');
+  if(!email || !pass){ err.classList.add('show'); err.textContent='Заполните все поля'; return; }
+  const user  = USERS_DB[email];
+  if(!user || user.pass !== pass){
+    err.classList.add('show'); err.textContent='Неверный email или пароль'; return;
+  }
+  err.classList.remove('show');
+  enterApp(user);
+}
+
+function doRegister(){
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const err   = document.getElementById('regError');
+  if(!name || !email || !pass){ err.classList.add('show'); err.textContent='Заполните все поля'; return; }
+  if(pass.length < 6){ err.classList.add('show'); err.textContent='Пароль минимум 6 символов'; return; }
+  if(USERS_DB[email]){ err.classList.add('show'); err.textContent='Пользователь с таким email уже существует'; return; }
+  err.classList.remove('show');
+  USERS_DB[email] = {name, email, pass};
+  enterApp({name, email});
+}
+
+function socialLogin(provider){
+  // В демо просто создаём гостевой аккаунт
+  const name = 'Пользователь ' + provider;
+  enterApp({name, email: provider.toLowerCase()+'@demo'});
+}
+
+function skipAuth(){
+  enterApp({name:'Гость', email:'guest'});
+}
+
+function enterApp(user){
+  currentUser = user;
+  // Обновляем топбар — заменяем кнопку «Начать» на аватар с именем
+  const right = document.querySelector('.topbar-right');
+  const btn   = right.querySelector('.btn-go');
+  if(btn){
+    const badge = document.createElement('div');
+    badge.className = 'user-badge';
+    const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    badge.innerHTML = `<div class="user-av">${initials}</div><span class="user-name">${user.name}</span>`;
+    badge.onclick = () => { if(confirm('Выйти из аккаунта?')){ logOut(); } };
+    btn.replaceWith(badge);
+  }
+  // Прячем экран авторизации с анимацией
+  const screen = document.getElementById('authScreen');
+  screen.classList.add('hide');
+  setTimeout(()=>{ screen.style.display='none'; }, 500);
+  // Передаём имя в анкету если не гость
+  if(user.name !== 'Гость') currentApplicant.name = user.name.split(' ')[0];
+}
+
+function logOut(){
+  currentUser = null;
+  currentApplicant = {};
+  recommendedIds = [];
+  window._scores = {};
+  // Показываем экран авторизации снова
+  const screen = document.getElementById('authScreen');
+  screen.classList.remove('hide');
+  screen.style.display = 'flex';
+  document.getElementById('authContainer').classList.remove('active');
+  // Восстанавливаем кнопку «Начать»
+  const badge = document.querySelector('.user-badge');
+  if(badge){
+    const btn = document.createElement('button');
+    btn.className='btn-go'; btn.textContent='Начать';
+    btn.onclick = ()=>goTab('chat');
+    badge.replaceWith(btn);
+  }
+  // Сбрасываем чат
+  document.getElementById('chatMsgs').innerHTML='';
+  stepIdx=0; waitingInput=false; window._radarDone=false; window._ri=null;
+  goTab('chat');
+  setTimeout(()=>nextStep(),400);
+}
+
+// INIT
+buildTagFilters();
+goTab('chat');
+setTimeout(()=>nextStep(),400);
+</script>
+</body>
+</html>
