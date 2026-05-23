@@ -38,7 +38,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);dis
 /* form elements */
 .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
 .auth-logo-icon{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;}
-.auth-logo-icon svg{width:18px;height:18px;fill:#fff;}
+.auth-logo-icon img{width:18px;height:18px;}
 .auth-logo-text{font-size:16px;font-weight:700;color:var(--navy);}
 .auth-h2{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;}
 .auth-sub{font-size:12px;color:var(--text3);margin-bottom:22px;}
@@ -74,7 +74,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);dis
 .sidebar-logo{padding:18px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.07);}
 .logo-row{display:flex;align-items:center;gap:10px;}
 .logo-icon{width:32px;height:32px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;}
-.logo-icon svg{width:18px;height:18px;fill:#fff;}
+.logo-icon img{width:18px;height:18px;}
 .logo-text{color:#fff;font-size:14px;font-weight:700;line-height:1.2;}
 .logo-sub{color:rgba(255,255,255,0.4);font-size:10px;}
 .sidebar-nav{flex:1;padding:12px 8px;}
@@ -240,6 +240,21 @@ input[type=range]{width:100%;accent-color:var(--navy);}
 .pf-links a{font-size:12px;color:var(--text3);text-decoration:none;}
 .pf-links a:hover{color:var(--text);}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+/* HISTORY */
+.hist-empty{padding:60px;text-align:center;color:var(--text3);font-size:14px;}
+.hist-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;}
+.hist-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hist-date{font-size:11px;color:var(--text3);}
+.hist-type{font-size:11px;font-weight:700;background:var(--teal-light);color:#0a7a60;border-radius:6px;padding:2px 8px;}
+.hist-dirs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.hist-dir{font-size:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text2);}
+.hist-text{font-size:12px;color:var(--text2);line-height:1.6;max-height:80px;overflow:hidden;position:relative;}
+.hist-text.open{max-height:none;}
+.hist-text::after{content:'';position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--white));}
+.hist-text.open::after{display:none;}
+.hist-toggle{font-size:11px;color:var(--teal);cursor:pointer;margin-top:5px;display:inline-block;}
+.hist-loading{padding:40px;text-align:center;color:var(--text3);}
 </style>
 </head>
 <body>
@@ -252,7 +267,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
     <!-- ФОРМА ВХОДА -->
     <div class="auth-form-box login-box">
       <div class="auth-logo">
-        <div class="auth-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div class="auth-logo-icon"><img src="logo.svg" alt="EduPath AI logo"/></div>
         <span class="auth-logo-text">EduPath AI</span>
       </div>
       <h2 class="auth-h2">Добро пожаловать</h2>
@@ -273,7 +288,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
     <!-- ФОРМА РЕГИСТРАЦИИ -->
     <div class="auth-form-box register-box">
       <div class="auth-logo">
-        <div class="auth-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div class="auth-logo-icon"><img src="logo.svg" alt="EduPath AI logo"/></div>
         <span class="auth-logo-text">EduPath AI</span>
       </div>
       <h2 class="auth-h2">Создать аккаунт</h2>
@@ -319,7 +334,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-row">
-      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div class="logo-icon"><img src="logo.svg" alt="EduPath AI logo"/></div>
       <div><div class="logo-text">EduPath AI</div><div class="logo-sub">ПГУТИ — Подбор направлений</div></div>
     </div>
   </div>
@@ -327,7 +342,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
     <div class="nav-item active" onclick="goTab('chat')" id="sn-chat">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Новый чат
     </div>
-    <div class="nav-item" onclick="goTab('chat')">
+    <div class="nav-item" onclick="goTab('history')" id="sn-history">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>История
     </div>
     <div class="nav-item" onclick="goTab('analytics')" id="sn-analytics">
@@ -367,7 +382,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
           <input type="text" id="chatIn" placeholder="Напиши сообщение или выбери вариант выше..." onkeydown="if(event.key==='Enter')sendMsg()"/>
           <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
         </div>
-        <p class="chat-note">EduPath AI собирает анкету для подбора направлений ПГУТИ. Данные не сохраняются.</p>
+        <p class="chat-note">EduPath AI собирает анкету для подбора направлений ПГУТИ. Данные сохраняются для авторизованных пользователей.</p>
       </div>
     </div>
 
@@ -409,7 +424,7 @@ input[type=range]{width:100%;accent-color:var(--navy);}
       </div>
       <div class="dir-cards" id="analyticsDirCards"></div>
       <div class="pf" style="margin:24px -28px -24px;">
-        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2024. Помогаем выбрать путь.</span></div>
+        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2026. Помогаем выбрать путь.</span></div>
         <div class="pf-links"><a href="#">Конфиденциальность</a><a href="#">Контакты</a><a href="#">О системе</a></div>
       </div>
     </div>
@@ -454,7 +469,20 @@ input[type=range]{width:100%;accent-color:var(--navy);}
         <div class="prog-grid" id="progGrid"></div>
       </div>
       <div class="pf" style="margin:24px -28px -24px;">
-        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2024. Помогаем выбрать путь.</span></div>
+        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2026. Помогаем выбрать путь.</span></div>
+        <div class="pf-links"><a href="#">Конфиденциальность</a><a href="#">Контакты</a><a href="#">О системе</a></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="page-history" style="display:none;">
+      <div class="rec-hd">
+        <h1>История рекомендаций</h1>
+        <p>Ваши предыдущие запросы и результаты AI-подбора.</p>
+      </div>
+      <div id="historyList"><div class="hist-loading">Загрузка...</div></div>
+      <div class="pf" style="margin:24px -28px -24px;">
+        <div class="pf-brand">EduPath AI — ПГУТИ<span>© 2026. Помогаем выбрать путь.</span></div>
         <div class="pf-links"><a href="#">Конфиденциальность</a><a href="#">Контакты</a><a href="#">О системе</a></div>
       </div>
     </div>
@@ -471,6 +499,8 @@ input[type=range]{width:100%;accent-color:var(--navy);}
 </div>
 
 <script>
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 // ================================================================
 // КАТАЛОГ НАПРАВЛЕНИЙ ПГУТИ (из directions_catalog.json)
 // ================================================================
@@ -519,9 +549,9 @@ let waitingInput = false;
 
 function getBotText(id){
   if(id==='greeting') return `Привет! 👋 Я помогу подобрать подходящее направление в <b>ПГУТИ</b>.\n\nОтвечу на вопросы по каждой программе и подберу лучшие варианты под твой профиль. Для начала — как тебя зовут?`;
-  if(id==='type') return `Приятно познакомиться, <b>${currentApplicant.name}</b>! 🎓\n\nКуда планируешь поступать?`;
+  if(id==='type') return `Приятно познакомиться, <b>${esc(currentApplicant.name)}</b>! 🎓\n\nКуда планируешь поступать?`;
   if(id==='ege') return currentApplicant.type==='Бакалавриат'
-    ? `Хорошо! Введи свои баллы ЕГЭ — я учту минимальные проходные баллы программ.\n<span style="font-size:12px;color:var(--text3)">Можно пропустить предметы, которые не сдавал(а).</span>`
+    ? `Хорошо! Введи свои баллы ЕГЭ — я учту минимальные проходные баллы программ.\n<span style="font-size:12px;color:var(--text3)">Можно пропустить предметы, которые не сдавал(а). Если поступаешь после колледжа — нажми кнопку ниже.</span>`
     : `Расскажи, по какой специальности или направлению у тебя диплом бакалавра? Это поможет точнее подобрать магистратуру.`;
   if(id==='work_format') return `Понял! Теперь расскажи — в каком формате хочешь работать?`;
   if(id==='it_level') return `Ясно! Какой у тебя уровень IT-подготовки?`;
@@ -535,7 +565,21 @@ function makeChipsHTML(labels){
 
 function makeEgeFormHTML(){
   const subs=[['Русский язык','rus'],['Математика (проф.)','math'],['Физика','phys'],['Информатика и ИКТ','cs'],['Обществознание','soc'],['История','hist']];
-  return `<div class="ege-grid">${subs.map(([n,id])=>`<div class="ege-row"><label class="ege-label">${n}</label><input class="ege-input" type="number" id="ege-${id}" min="0" max="100" placeholder="–"></div>`).join('')}</div><button class="submit-btn" onclick="submitEge()">Подтвердить баллы</button>`;
+  return `<div class="ege-grid">${subs.map(([n,id])=>`<div class="ege-row"><label class="ege-label">${n}</label><input class="ege-input" type="number" id="ege-${id}" min="0" max="100" placeholder="–"></div>`).join('')}</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+  <button class="submit-btn" style="flex:1" onclick="submitEge()">Подтвердить баллы</button>
+  <button class="submit-btn spo-btn" style="flex:1;background:var(--navy2)" onclick="skipEgeSpo()">У меня нет баллов (СПО)</button>
+</div>`;
+}
+
+function skipEgeSpo(){
+  currentApplicant.egeScores = {};
+  currentApplicant.isSpo = true;
+  document.querySelectorAll('.ege-input').forEach(e=>e.disabled=true);
+  document.querySelectorAll('.submit-btn').forEach(e=>e.disabled=true);
+  addUserMsg('У меня нет баллов ЕГЭ — поступаю после колледжа (СПО)');
+  stepIdx++;
+  setTimeout(nextStep, 400);
 }
 
 function addBotMsg(html, extras=''){
@@ -560,8 +604,13 @@ function addUserMsg(text){
   const msgs=document.getElementById('chatMsgs');
   const d=document.createElement('div');
   d.className='msg um';
-  d.innerHTML=`<div class="av u">Я</div><div class="msg-body"><div class="msg-who" style="text-align:right">Вы</div><div class="bubble">${text}</div></div>`;
-  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  const av=document.createElement('div'); av.className='av u'; av.textContent='Я';
+  const body=document.createElement('div'); body.className='msg-body';
+  const who=document.createElement('div'); who.className='msg-who'; who.style.textAlign='right'; who.textContent='Вы';
+  const bubble=document.createElement('div'); bubble.className='bubble'; bubble.textContent=text;
+  body.appendChild(who); body.appendChild(bubble);
+  d.appendChild(av); d.appendChild(body);
+  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
 }
 
 async function nextStep(){
@@ -593,7 +642,7 @@ function submitEge(){
   Object.entries(map).forEach(([k,n])=>{const v=document.getElementById('ege-'+k)?.value;if(v&&+v>0)scores[n]=+v;});
   currentApplicant.egeScores=scores;
   document.querySelectorAll('.ege-input').forEach(e=>e.disabled=true);
-  document.querySelector('.submit-btn') && (document.querySelector('.submit-btn').disabled=true);
+  document.querySelectorAll('.submit-btn').forEach(e=>e.disabled=true);
   const sum=Object.entries(scores).map(([s,v])=>`${s}: ${v}`).join(', ')||'не указаны';
   addUserMsg('Баллы ЕГЭ: '+sum);
   stepIdx++;setTimeout(nextStep,400);
@@ -612,12 +661,7 @@ async function sendMsg(){
   stepIdx++;setTimeout(nextStep,400);
 }
 
-async function finishAnketa(){
-  computeRecommendations();
-  const top3=recommendedIds.slice(0,3).map(id=>CATALOG.find(d=>d.id===id)).filter(Boolean);
-  const names=top3.map(d=>`<b>${d.title}</b>`).join(', ');
-  await addBotMsg(`Готово! 🎉 Я проанализировал твой профиль и подобрал направления.\n\nТоп-3: ${names||'несколько программ ПГУТИ'}.\n\nПерейди в раздел <b>Рекомендации</b> для полного списка или в <b>Аналитику</b> для просмотра своего профиля.`);
-  updateAnalytics();
+function showNavButtons(){
   const msgs=document.getElementById('chatMsgs');
   const d=document.createElement('div');
   d.className='msg';
@@ -629,6 +673,53 @@ async function finishAnketa(){
     </div>
   </div></div>`;
   msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function finishAnketa(){
+  computeRecommendations();
+  updateAnalytics();
+
+  await addBotMsg('Анкета заполнена! Отправляю данные AI-модели... ⏳');
+
+  const payload = {
+    full_name:          currentApplicant.name || 'Абитуриент',
+    applicant_type:     currentApplicant.type === 'Магистратура' ? 'Магистратура' : currentApplicant.isSpo ? 'Бакалавриат (СПО)' : 'Бакалавриат (ЕГЭ)',
+    ege_scores:         currentApplicant.egeScores || {},
+    previous_education: currentApplicant.prevEdu || '',
+    work_format:        currentApplicant.workFormat || '',
+    it_level:           currentApplicant.itLevel || '',
+    interests:          currentApplicant.interests || '',
+  };
+
+  try {
+    const resp = await fetch('/recommend', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json();
+    if(data.status === 'ok'){
+      if(data.top_directions && data.top_directions.length){
+        document.getElementById('analyticsDirCards').innerHTML = data.top_directions.map((td, i) => {
+          const d = CATALOG.find(x => x.title === td.title);
+          if(!d) return '';
+          return `<div class="dir-card${i===0?' hl':''}" onclick="openModal(${d.id})">
+            <div class="dir-ico">${d.icon}</div>
+            <div class="dir-name">${d.title}</div>
+            <div class="dir-desc">${d.short}</div>
+            <div class="dir-code">${d.code} · ${d.faculty} · ${d.level==='bachelor'?'Бакалавриат':'Магистратура'}</div>
+          </div>`;
+        }).join('');
+      }
+      await addBotMsg('Готово! 🎉 AI подобрал направления — смотри в разделе <b>Аналитика профиля</b>.');
+    } else {
+      await addBotMsg(`Сервис временно недоступен: ${data.error||'ошибка сервиса'}`);
+    }
+  } catch(e) {
+    await addBotMsg('Не удалось связаться с AI-моделью (Ollama не запущен?). Перейди в <b>Аналитику</b> — там результаты на основе профиля.');
+  }
+
+  showNavButtons();
 }
 
 // ================================================================
@@ -776,7 +867,7 @@ function updateAnalytics(){
   document.getElementById('soft-pct').textContent = soft+'%';
   document.getElementById('it-pct').textContent   = itSc+'%';
 
-  // Резюме
+  // Резюме анкеты
   document.getElementById('resumeText').textContent =
     `Имя: ${currentApplicant.name||'—'}\nТип поступления: ${currentApplicant.type||'—'}\nФормат работы: ${wf||'—'}\nIT-уровень: ${it||'—'}\nИнтересы: ${currentApplicant.interests||'—'}`;
 
@@ -929,24 +1020,22 @@ function closeModal(){document.getElementById('modalBg').style.display='none';}
 // НАВИГАЦИЯ
 // ================================================================
 function goTab(tab){
-  ['chat','analytics','recs'].forEach(t=>document.getElementById('page-'+t).style.display='none');
+  ['chat','analytics','recs','history'].forEach(t=>document.getElementById('page-'+t).style.display='none');
   document.getElementById('page-'+tab).style.display=tab==='chat'?'flex':'block';
   document.querySelectorAll('.top-tab').forEach(t=>t.classList.remove('active'));
   if(tab==='chat') document.getElementById('tt-chat').classList.add('active');
   if(tab==='recs') document.getElementById('tt-recs').classList.add('active');
-  ['chat','analytics','recs'].forEach(t=>{
+  ['chat','analytics','recs','history'].forEach(t=>{
     const el=document.getElementById('sn-'+t);if(el)el.classList.toggle('active',t===tab);
   });
   if(tab==='recs') renderProgs();
   if(tab==='analytics'&&!window._radarDone){window._radarDone=true;setTimeout(()=>drawRadar(computeRadarScores()),150);}
+  if(tab==='history') loadHistory();
 }
 
 // ================================================================
 // АВТОРИЗАЦИЯ
 // ================================================================
-// Простое in-memory хранилище пользователей (для демо)
-// В реальном проекте заменить на вызовы Flask API /register, /login
-const USERS_DB = {};
 let currentUser = null;
 
 function switchToRegister(){
@@ -956,36 +1045,39 @@ function switchToLogin(){
   document.getElementById('authContainer').classList.remove('active');
 }
 
-function doLogin(){
+async function doLogin(){
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
   const err   = document.getElementById('loginError');
   if(!email || !pass){ err.classList.add('show'); err.textContent='Заполните все поля'; return; }
-  const user  = USERS_DB[email];
-  if(!user || user.pass !== pass){
-    err.classList.add('show'); err.textContent='Неверный email или пароль'; return;
-  }
-  err.classList.remove('show');
-  enterApp(user);
+  try {
+    const resp = await fetch('/api/login', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pass}),
+    });
+    const data = await resp.json();
+    if(data.status === 'ok'){ err.classList.remove('show'); enterApp(data); }
+    else { err.classList.add('show'); err.textContent = data.error || 'Ошибка входа'; }
+  } catch(e) { err.classList.add('show'); err.textContent='Нет связи с сервером'; }
 }
 
-function doRegister(){
+async function doRegister(){
   const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const pass  = document.getElementById('regPass').value;
   const err   = document.getElementById('regError');
   if(!name || !email || !pass){ err.classList.add('show'); err.textContent='Заполните все поля'; return; }
-  if(pass.length < 6){ err.classList.add('show'); err.textContent='Пароль минимум 6 символов'; return; }
-  if(USERS_DB[email]){ err.classList.add('show'); err.textContent='Пользователь с таким email уже существует'; return; }
-  err.classList.remove('show');
-  USERS_DB[email] = {name, email, pass};
-  enterApp({name, email});
-}
-
-function socialLogin(provider){
-  // В демо просто создаём гостевой аккаунт
-  const name = 'Пользователь ' + provider;
-  enterApp({name, email: provider.toLowerCase()+'@demo'});
+  try {
+    const resp = await fetch('/api/register', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password: pass}),
+    });
+    const data = await resp.json();
+    if(data.status === 'ok'){ err.classList.remove('show'); enterApp(data); }
+    else { err.classList.add('show'); err.textContent = data.error || 'Ошибка регистрации'; }
+  } catch(e) { err.classList.add('show'); err.textContent='Нет связи с сервером'; }
 }
 
 function skipAuth(){
@@ -994,7 +1086,6 @@ function skipAuth(){
 
 function enterApp(user){
   currentUser = user;
-  // Обновляем топбар — заменяем кнопку «Начать» на аватар с именем
   const right = document.querySelector('.topbar-right');
   const btn   = right.querySelector('.btn-go');
   if(btn){
@@ -1005,25 +1096,22 @@ function enterApp(user){
     badge.onclick = () => { if(confirm('Выйти из аккаунта?')){ logOut(); } };
     btn.replaceWith(badge);
   }
-  // Прячем экран авторизации с анимацией
   const screen = document.getElementById('authScreen');
   screen.classList.add('hide');
   setTimeout(()=>{ screen.style.display='none'; }, 500);
-  // Передаём имя в анкету если не гость
   if(user.name !== 'Гость') currentApplicant.name = user.name.split(' ')[0];
 }
 
-function logOut(){
+async function logOut(){
+  await fetch('/api/logout', {method:'POST', credentials:'include'}).catch(()=>{});
   currentUser = null;
   currentApplicant = {};
   recommendedIds = [];
   window._scores = {};
-  // Показываем экран авторизации снова
   const screen = document.getElementById('authScreen');
   screen.classList.remove('hide');
   screen.style.display = 'flex';
   document.getElementById('authContainer').classList.remove('active');
-  // Восстанавливаем кнопку «Начать»
   const badge = document.querySelector('.user-badge');
   if(badge){
     const btn = document.createElement('button');
@@ -1031,12 +1119,66 @@ function logOut(){
     btn.onclick = ()=>goTab('chat');
     badge.replaceWith(btn);
   }
-  // Сбрасываем чат
   document.getElementById('chatMsgs').innerHTML='';
-  stepIdx=0; waitingInput=false; window._radarDone=false; window._ri=null;
+  stepIdx=0; waitingInput=false;
+  if(window._ri){ window._ri.destroy(); window._ri=null; } window._radarDone=false;
   goTab('chat');
   setTimeout(()=>nextStep(),400);
 }
+
+// ================================================================
+// ИСТОРИЯ РЕКОМЕНДАЦИЙ
+// ================================================================
+async function loadHistory(){
+  const list = document.getElementById('historyList');
+  if(!currentUser || currentUser.email === 'guest'){
+    list.innerHTML='<div class="hist-empty">Войдите в аккаунт, чтобы увидеть историю рекомендаций.</div>';
+    return;
+  }
+  list.innerHTML='<div class="hist-loading">Загрузка...</div>';
+  try {
+    const resp = await fetch('/api/history', {credentials:'include'});
+    const data = await resp.json();
+    if(!data.history || !data.history.length){
+      list.innerHTML='<div class="hist-empty">История пуста — завершите анкету, чтобы сохранить рекомендацию.</div>';
+      return;
+    }
+    list.innerHTML = data.history.map((r,i)=>{
+      const date = new Date(r.created_at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const dirs = (r.top_directions||[]).map(d=>`<span class="hist-dir">${esc(d.title||'')}</span>`).join('');
+      const txt  = esc(r.recommendation_text||'').replace(/\n/g,'<br>');
+      return `<div class="hist-card">
+        <div class="hist-meta">
+          <span class="hist-date">${date}</span>
+          <span class="hist-type">${esc(r.applicant_type||'')}</span>
+        </div>
+        ${dirs?`<div class="hist-dirs">${dirs}</div>`:''}
+        <div class="hist-text" id="ht-${i}">${txt}</div>
+        <span class="hist-toggle" onclick="toggleHist(${i})">Показать полностью ▾</span>
+      </div>`;
+    }).join('');
+  } catch(e){
+    list.innerHTML='<div class="hist-empty">Не удалось загрузить историю. Попробуйте позже.</div>';
+  }
+}
+
+function toggleHist(i){
+  const el=document.getElementById('ht-'+i);
+  const btn=el.nextElementSibling;
+  el.classList.toggle('open');
+  btn.textContent=el.classList.contains('open')?'Свернуть ▴':'Показать полностью ▾';
+}
+
+// Восстанавливаем сессию при загрузке страницы
+(async()=>{
+  try {
+    const resp = await fetch('/api/me', {credentials:'include'});
+    if(resp.ok){
+      const user = await resp.json();
+      if(user.status === 'ok') enterApp(user);
+    }
+  } catch(e){}
+})();
 
 // INIT
 buildTagFilters();

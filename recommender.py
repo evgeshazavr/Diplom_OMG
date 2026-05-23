@@ -16,9 +16,15 @@
 """
 
 import json
+import os
 import re
 import sys
 import numpy as np
+
+# Ollama работает локально — не пускать через системный прокси
+os.environ.setdefault("NO_PROXY", "localhost,127.0.0.1")
+os.environ.setdefault("no_proxy", "localhost,127.0.0.1")
+
 import ollama
 from sentence_transformers import SentenceTransformer
 
@@ -275,7 +281,12 @@ def get_recommendation(applicant: dict, chunks: list, index: np.ndarray,
         options={"temperature": 0.3, "num_predict": 1024},
     )
 
-    return response["message"]["content"]
+    top_directions = [
+        {"title": c["direction_title"], "level": c["level"], "faculty": c["faculty"]}
+        for c in candidates[:3]
+    ]
+
+    return {"text": response["message"]["content"], "top_directions": top_directions}
 
 # ================================================================
 # ИНТЕРАКТИВНЫЙ РЕЖИМ
@@ -335,7 +346,7 @@ def interactive_mode(chunks, index, embed_model, directions):
     print("\n" + "=" * 60)
     print("РЕКОМЕНДАЦИИ")
     print("=" * 60)
-    print(result)
+    print(result["text"] if isinstance(result, dict) else result)
 
 # ================================================================
 # DEMO
@@ -370,7 +381,7 @@ def run_demo(chunks, index, embed_model, directions):
 
         result = get_recommendation(applicant, chunks, index, embed_model, directions)
         print("\nОтвет модели:")
-        print(result)
+        print(result["text"] if isinstance(result, dict) else result)
         print("\nОжидаемый (из датасета):")
         print(ex["output"][:500] + "...")
         print()
