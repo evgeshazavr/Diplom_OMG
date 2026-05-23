@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+.claude/
+*.db
+flask_out.txt
+dataset_full.json
+dataset_train.jsonl
+dataset_val.jsonl
