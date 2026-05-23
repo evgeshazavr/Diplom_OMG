@@ -12,7 +12,7 @@ COPY app.py database.py recommender.py edupath.html logo.svg \
      rag_chunks.json directions_catalog.json ./
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 EXPOSE 5000
 

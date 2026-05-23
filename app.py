@@ -172,5 +172,6 @@ def get_directions():
 
 if __name__ == "__main__":
     port = 5000
-    threading.Timer(1.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
+    if not os.environ.get("DOCKER"):
+        threading.Timer(1.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
     app.run(debug=False, host="0.0.0.0", port=port)

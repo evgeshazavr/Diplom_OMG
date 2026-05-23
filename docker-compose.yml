@@ -34,6 +34,7 @@ services:
       - OLLAMA_HOST=http://ollama:11434
       - SECRET_KEY=change-me-in-production
       - DATA_DIR=/data
+      - DOCKER=1
     volumes:
       - db_data:/data
       - hf_cache:/root/.cache/huggingface
